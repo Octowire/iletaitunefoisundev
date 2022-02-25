@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { Validators } from '@angular/forms';
 import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
-import { Credential } from '@app/core/models';
+import { Credentials } from '@app/core/models';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -10,14 +10,14 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit {
-  loginForm: FormGroup<ControlsOf<Credential>> = new FormGroup<
-    ControlsOf<Credential>
+  loginForm: FormGroup<ControlsOf<Credentials>> = new FormGroup<
+    ControlsOf<Credentials>
   >({
-    email: new FormControl<Credential['email']>('', [
+    email: new FormControl<Credentials['email']>('', [
       Validators.required,
       Validators.email,
     ]),
-    password: new FormControl<Credential['password']>('', [
+    password: new FormControl<Credentials['password']>('', [
       Validators.required,
     ]),
   });
@@ -31,5 +31,5 @@ export class LoginComponent implements OnInit {
     this.returnUrl = this.route.snapshot.queryParams['return'] || '/';
   }
 
-  onSubmit();
+  onSubmit(): void {}
 }
