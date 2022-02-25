@@ -8,8 +8,9 @@ import {
 import { Credentials } from '@app/core/models';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import {
+  RefreshToken,
+  SecurityToken,
   Token,
-  TokenAuthenticatorStrategy,
 } from '@app/core/security/strategy/token-authenticator-strategy';
 import {
   LoginInterface,
@@ -20,10 +21,11 @@ import {
   providedIn: 'root',
 })
 export class AuthenticatorService
-  implements LoginInterface<Token>, RefreshTokenInterface<Token>
+  implements
+    LoginInterface<Token>,
+    RefreshTokenInterface<RefreshToken, SecurityToken>
 {
   public readonly LOGIN_PATH = '/api/security/login';
-  public readonly LOGOUT_PATH = '/api/security/logout';
   private readonly REFRESH_TOKEN_URL = '/api/security/token-refresh';
 
   constructor(
@@ -61,9 +63,9 @@ export class AuthenticatorService
     this.authenticator.onLogoutPlayer();
   }
 
-  refresh(data: Token): Observable<Token> {
+  refresh(refreshToken: RefreshToken): Observable<SecurityToken> {
     return this.httpClient
-      .post<Token>(this.REFRESH_TOKEN_URL, { refreshToken: data.refreshToken })
+      .post<Token>(this.REFRESH_TOKEN_URL, refreshToken.refreshToken)
       .pipe(
         tap((token: Token) => {
           this.authenticator.onLoginPlayer(token);
@@ -77,7 +79,7 @@ export const LOGIN_TOKEN = new InjectionToken<LoginInterface<Token>>(
 );
 
 export const REFRESH_TOKEN_TOKEN = new InjectionToken<
-  RefreshTokenInterface<Partial<Token>>
+  RefreshTokenInterface<RefreshToken, SecurityToken>
 >('app.security.refresh_token');
 
 export const LOGIN_PROVIDER: Provider = {

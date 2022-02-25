@@ -1,19 +1,31 @@
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, Provider } from '@angular/core';
 import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
   HttpInterceptor,
-  HttpXsrfTokenExtractor,
+  HTTP_INTERCEPTORS,
 } from '@angular/common/http';
-import {BehaviorSubject, catchError, Observable, switchMap, tap, throwError} from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  EMPTY,
+  filter,
+  Observable,
+  switchMap,
+  take,
+  tap,
+  throwError,
+} from 'rxjs';
 import {
   AuthenticatorService,
   REFRESH_TOKEN_TOKEN,
 } from '@app/core/security/authenticator.service';
 import { AUTHENTICATOR_STRATEGY } from '@app/core/security/strategy/authenticator-strategy';
 import {
-  Token,
+  AuthToken,
+  RefreshToken,
+  SecurityToken,
   TokenAuthenticatorStrategy,
 } from '@app/core/security/strategy/token-authenticator-strategy';
 import { RefreshTokenInterface } from '@app/core/security/strategy/interfaces';
@@ -25,21 +37,20 @@ export class AuthInterceptor implements HttpInterceptor {
     @Inject(AUTHENTICATOR_STRATEGY)
     private tokenStrategy: TokenAuthenticatorStrategy,
     @Inject(REFRESH_TOKEN_TOKEN)
-    private refreshToken: RefreshTokenInterface<Partial<Token>>
+    private refreshToken: RefreshTokenInterface<RefreshToken, SecurityToken>
   ) {}
 
   private isRefreshing = false;
-  private tokenSubject: BehaviorSubject<unknown> = new BehaviorSubject<unknown>(
-    null
-  );
+  private tokenSubject: BehaviorSubject<AuthToken> =
+    new BehaviorSubject<AuthToken>({} as AuthToken);
 
   private static addToken(
     request: HttpRequest<unknown>,
-    token: string | null
+    authToken: AuthToken
   ): HttpRequest<unknown> {
     return request.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken.token}`,
       },
     });
   }
@@ -48,8 +59,7 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
-    // make here logic for different strategy
-    if (this.tokenStrategy && this.tokenStrategy.getToken()) {
+    if (this.tokenStrategy && this.tokenStrategy.hasToken()) {
       request = AuthInterceptor.addToken(
         request,
         this.tokenStrategy.getToken()
@@ -60,20 +70,35 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((err): Observable<never> => {
         if (err.status === 401 && !this.isRefreshing) {
           this.isRefreshing = true;
-          this.tokenSubject.next(null);
+          this.tokenSubject.next({} as AuthToken);
 
           this.authenticator.isLoggedIn$().pipe(
             tap((isLoggedIn) => {
               if (isLoggedIn) {
-                return this.refreshToken.refresh(this.tokenStrategy.getToken()).pipe(
-                  switchMap(token: any) => {
-                    this.isRefreshing = false;
-                    this.tokenSubject.next(token);
-                    return  next handle(AuthInterceptor.addToken(request, token))
-                }
-                )
+                return this.refreshToken
+                  .refresh(this.tokenStrategy.getRefreshToken())
+                  .pipe(
+                    switchMap((token: AuthToken) => {
+                      this.isRefreshing = false;
+                      this.tokenSubject.next(token);
+                      return next.handle(
+                        AuthInterceptor.addToken(request, token)
+                      );
+                    }),
+                    catchError(() => {
+                      this.isRefreshing = false;
+                      this.authenticator.logoutAndRedirectToLogin();
+                      return EMPTY;
+                    })
+                  );
               } else {
-                this.authenticator.logoutAndRedirectToLogin();
+                return this.tokenSubject.pipe(
+                  filter((authToken: AuthToken) => authToken.token !== null),
+                  take(1),
+                  switchMap((authToken: AuthToken) =>
+                    next.handle(AuthInterceptor.addToken(request, authToken))
+                  )
+                );
               }
             })
           );
@@ -83,3 +108,9 @@ export class AuthInterceptor implements HttpInterceptor {
     );
   }
 }
+
+export const AUTH_INTERCEPTOR_PROVIDER: Provider = {
+  provide: HTTP_INTERCEPTORS,
+  useClass: AuthInterceptor,
+  multi: true,
+};

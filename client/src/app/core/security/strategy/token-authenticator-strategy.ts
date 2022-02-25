@@ -1,12 +1,12 @@
 import { AuthenticatorStrategy } from '@app/core/security/strategy/authenticator-strategy';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Player } from '@app/core/models';
-import { Loggable } from '@app/core/security/authenticator.service';
 
 export interface TokenAuthenticatorData {
-  getToken(): string | null;
-  getRefreshToken(): string | null;
-  getTokens(): Token;
+  getToken(): AuthToken;
+  getRefreshToken(): RefreshToken;
+  hasToken(): boolean;
+  hasRefreshToken(): boolean;
 }
 
 export class TokenAuthenticatorStrategy
@@ -20,10 +20,10 @@ export class TokenAuthenticatorStrategy
   }
 
   getCurrentPlayerSubject(): BehaviorSubject<Player> {
-    const token = this.getToken();
+    const authToken: AuthToken = this.getToken();
 
-    if (token) {
-      const encodePayload = token.split('.')[1];
+    if (authToken.token) {
+      const encodePayload = authToken.token.split('.')[1];
       const payload = window.atob(encodePayload);
       return new BehaviorSubject<Player>(JSON.parse(payload).username);
     }
@@ -32,9 +32,13 @@ export class TokenAuthenticatorStrategy
     return new BehaviorSubject<Player>(false);
   }
 
-  onLoginPlayer(data: Token): void {
-    localStorage.setItem(this.JWT_TOKEN, data.token);
-    localStorage.setItem(this.JWT_REFRESH_TOKEN, data.refreshToken);
+  onLoginPlayer(data: SecurityToken): void {
+    if (typeof data.token === 'string') {
+      localStorage.setItem(this.JWT_TOKEN, data.token);
+    }
+    if (typeof data.refreshToken === 'string') {
+      localStorage.setItem(this.JWT_REFRESH_TOKEN, data.refreshToken);
+    }
   }
 
   onLogoutPlayer(): void {
@@ -42,21 +46,24 @@ export class TokenAuthenticatorStrategy
     localStorage.removeItem(this.JWT_REFRESH_TOKEN);
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.JWT_TOKEN);
+  getToken(): AuthToken {
+    return {
+      token: localStorage.getItem(this.JWT_TOKEN),
+    };
   }
 
-  getRefreshToken(): string | null {
-    return localStorage.getItem(this.JWT_REFRESH_TOKEN);
+  getRefreshToken(): RefreshToken {
+    return {
+      refreshToken: localStorage.getItem(this.JWT_REFRESH_TOKEN),
+    };
   }
 
-  getTokens(): Token {
-    if (this.getRefreshToken() && this.getToken()) {
-      return {
-        token: this.getToken()!,
-        refreshToken: this.getRefreshToken()!,
-      };
-    } else return {} as SecurityToken;
+  hasToken(): boolean {
+    return this.getToken().token !== null;
+  }
+
+  hasRefreshToken(): boolean {
+    return this.getRefreshToken().refreshToken !== null;
   }
 }
 
@@ -65,11 +72,16 @@ export class Token implements SecurityToken {
     this.token = token;
     this.refreshToken = refreshToken;
   }
-  token: string;
-  refreshToken: string;
+  token: string | null;
+  refreshToken: string | null;
 }
 
-export interface SecurityToken {
-  token: string;
-  refreshToken: string;
+export interface SecurityToken extends AuthToken, RefreshToken {}
+
+export interface AuthToken {
+  token: string | null;
+}
+
+export interface RefreshToken {
+  refreshToken: string | null;
 }
