@@ -13,16 +13,16 @@ import {
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { LOGIN_ROUTE } from '@app/security/login/login.component';
-import { RefreshTokenInterface } from '@app/core/security/strategy/interfaces';
+import { RefreshTokenInterface } from '@app/core/security/strategy/token/interfaces';
 import {
   REFRESH_TOKEN_PROVIDER,
   REFRESH_TOKEN_TOKEN,
 } from '@app/core/security/authenticator.service';
 import { of } from 'rxjs';
-import { TokenAuthenticatorData } from '@app/core/security/strategy/interfaces/token-authenticator-data';
-import { SecurityToken } from '@app/core/security/strategy/interfaces/security-token';
-import { AuthToken } from '@app/core/security/strategy/interfaces/auth-token';
-import { RefreshToken } from '@app/core/security/strategy/interfaces/refresh-token';
+import { TokenAuthenticatorData } from '@app/core/security/strategy/token/interfaces/token-authenticator-data';
+import { SecurityToken } from '@app/core/security/strategy/token/interfaces/security-token';
+import { AuthToken } from '@app/core/security/strategy/token/interfaces/auth-token';
+import { RefreshToken } from '@app/core/security/strategy/token/interfaces/refresh-token';
 
 describe('AuthInterceptor', () => {
   let httpClient: HttpClient;

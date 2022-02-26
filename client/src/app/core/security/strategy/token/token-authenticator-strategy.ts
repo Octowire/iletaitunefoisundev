@@ -1,10 +1,11 @@
 import { AuthenticatorStrategy } from '@app/core/security/strategy/authenticator-strategy';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Player } from '@app/core/models';
-import { TokenAuthenticatorData } from '@app/core/security/strategy/interfaces/token-authenticator-data';
-import { SecurityToken } from '@app/core/security/strategy/interfaces/security-token';
-import { AuthToken } from '@app/core/security/strategy/interfaces/auth-token';
-import { RefreshToken } from '@app/core/security/strategy/interfaces/refresh-token';
+import { TokenAuthenticatorData } from '@app/core/security/strategy/token/interfaces/token-authenticator-data';
+import { SecurityToken } from '@app/core/security/strategy/token/interfaces/security-token';
+import { AuthToken } from '@app/core/security/strategy/token/interfaces/auth-token';
+import { RefreshToken } from '@app/core/security/strategy/token/interfaces/refresh-token';
+import { Token } from '@app/core/security/strategy/token/token';
 
 export class TokenAuthenticatorStrategy
   implements AuthenticatorStrategy<Token>, TokenAuthenticatorData
@@ -62,13 +63,4 @@ export class TokenAuthenticatorStrategy
   hasRefreshToken(): boolean {
     return this.getRefreshToken().refreshToken !== null;
   }
-}
-
-export class Token implements SecurityToken {
-  constructor(token: string, refreshToken: string) {
-    this.token = token;
-    this.refreshToken = refreshToken;
-  }
-  token: string | null;
-  refreshToken: string | null;
 }

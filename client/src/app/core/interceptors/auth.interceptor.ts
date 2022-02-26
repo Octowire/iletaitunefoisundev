@@ -22,17 +22,16 @@ import {
   REFRESH_TOKEN_TOKEN,
 } from '@app/core/security/authenticator.service';
 import { AUTHENTICATOR_STRATEGY } from '@app/core/security/strategy/authenticator-strategy';
-import { TokenAuthenticatorStrategy } from '@app/core/security/strategy/token-authenticator-strategy';
-import { RefreshTokenInterface } from '@app/core/security/strategy/interfaces';
-import { SecurityToken } from '@app/core/security/strategy/interfaces/security-token';
-import { AuthToken } from '@app/core/security/strategy/interfaces/auth-token';
-import { RefreshToken } from '@app/core/security/strategy/interfaces/refresh-token';
+import { TokenAuthenticatorStrategy } from '@app/core/security/strategy/token/token-authenticator-strategy';
+import { RefreshTokenInterface } from '@app/core/security/strategy/token/interfaces';
+import { SecurityToken } from '@app/core/security/strategy/token/interfaces/security-token';
+import { AuthToken } from '@app/core/security/strategy/token/interfaces/auth-token';
+import { RefreshToken } from '@app/core/security/strategy/token/interfaces/refresh-token';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   constructor(
     private authenticator: AuthenticatorService,
-    @Inject(AUTHENTICATOR_STRATEGY)
     private tokenStrategy: TokenAuthenticatorStrategy,
     @Inject(REFRESH_TOKEN_TOKEN)
     private refreshToken: RefreshTokenInterface<RefreshToken, SecurityToken>
