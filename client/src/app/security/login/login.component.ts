@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
 import { Credentials } from '@app/core/models';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Route } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -33,3 +33,8 @@ export class LoginComponent implements OnInit {
 
   onSubmit(): void {}
 }
+
+export const LOGIN_ROUTE: Route = {
+  path: 'logins',
+  component: LoginComponent,
+};

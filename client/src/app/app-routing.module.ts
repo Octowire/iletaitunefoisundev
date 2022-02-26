@@ -9,7 +9,7 @@ const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: '',
+    path: 'security',
     component: SecurityLayoutComponent,
     loadChildren: () =>
       import('./security/security.module').then((m) => m.SecurityModule),

@@ -1,11 +1,8 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { InjectionToken } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Player } from '@app/core/models';
-import {
-  TokenAuthenticatorData,
-  TokenAuthenticatorStrategy,
-} from '@app/core/security/strategy/token-authenticator-strategy';
+import { TokenAuthenticatorStrategy } from '@app/core/security/strategy/token-authenticator-strategy';
+import { TokenAuthenticatorData } from '@app/core/security/strategy/interfaces/token-authenticator-data';
 
 export interface AuthenticatorStrategy<T> {
   onLoginPlayer(data: T): void;
@@ -17,9 +14,8 @@ export interface AuthenticatorStrategy<T> {
   getCurrentPlayerSubject(): BehaviorSubject<Player>;
 }
 
-export const AUTHENTICATOR_STRATEGY = new InjectionToken<
-  AuthenticatorStrategy<unknown>
->('authenticator_strategy_token');
+export const AUTHENTICATOR_STRATEGY =
+  new InjectionToken<TokenAuthenticatorData>('authenticator_strategy_token');
 
 export const AUTHENTICATOR_STRATEGY_PROVIDER = {
   provide: AUTHENTICATOR_STRATEGY,

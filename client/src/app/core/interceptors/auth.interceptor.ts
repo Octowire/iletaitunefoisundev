@@ -22,13 +22,11 @@ import {
   REFRESH_TOKEN_TOKEN,
 } from '@app/core/security/authenticator.service';
 import { AUTHENTICATOR_STRATEGY } from '@app/core/security/strategy/authenticator-strategy';
-import {
-  AuthToken,
-  RefreshToken,
-  SecurityToken,
-  TokenAuthenticatorStrategy,
-} from '@app/core/security/strategy/token-authenticator-strategy';
+import { TokenAuthenticatorStrategy } from '@app/core/security/strategy/token-authenticator-strategy';
 import { RefreshTokenInterface } from '@app/core/security/strategy/interfaces';
+import { SecurityToken } from '@app/core/security/strategy/interfaces/security-token';
+import { AuthToken } from '@app/core/security/strategy/interfaces/auth-token';
+import { RefreshToken } from '@app/core/security/strategy/interfaces/refresh-token';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -59,6 +57,10 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
+    if (request.url.includes('/api/security/login')) {
+      return next.handle(request);
+    }
+
     if (this.tokenStrategy && this.tokenStrategy.hasToken()) {
       request = AuthInterceptor.addToken(
         request,

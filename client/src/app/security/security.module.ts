@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { SecurityRoutingModule } from './security-routing.module';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { SharedModule } from '@shared/shared.module';
-import { AUTHENTICATOR_STRATEGY_PROVIDER } from '@app/core/security/strategy/authenticator-strategy';
+import { RouterModule } from '@angular/router';
+import { SecurityRoutes } from '@app/security/security.routes';
 
 @NgModule({
   declarations: [LoginComponent, RegisterComponent],
-  imports: [CommonModule, SecurityRoutingModule, SharedModule],
-  providers: [AUTHENTICATOR_STRATEGY_PROVIDER],
+  imports: [CommonModule, SharedModule, RouterModule.forChild(SecurityRoutes)],
+  providers: [],
 })
 export class SecurityModule {}

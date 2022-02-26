@@ -7,15 +7,13 @@ import {
 } from '@app/core/security/strategy/authenticator-strategy';
 import { Credentials } from '@app/core/models';
 import { catchError, map, Observable, of, tap } from 'rxjs';
-import {
-  RefreshToken,
-  SecurityToken,
-  Token,
-} from '@app/core/security/strategy/token-authenticator-strategy';
+import { Token } from '@app/core/security/strategy/token-authenticator-strategy';
 import {
   LoginInterface,
   RefreshTokenInterface,
 } from '@app/core/security/strategy/interfaces';
+import { SecurityToken } from '@app/core/security/strategy/interfaces/security-token';
+import { RefreshToken } from '@app/core/security/strategy/interfaces/refresh-token';
 
 @Injectable({
   providedIn: 'root',

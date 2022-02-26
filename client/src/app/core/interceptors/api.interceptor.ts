@@ -15,7 +15,9 @@ export class ApiInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
+    console.log(request.url);
     if (!/^(http|https):/i.test(request.url)) {
+      console.log('inner');
       request = request.clone({ url: `${environment.apiUrl}${request.url}` });
     }
     return next.handle(request);
